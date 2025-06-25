@@ -4,14 +4,14 @@ from datetime import date
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
 
-from .constants import AGE_MAX_VALUE
+from .constants import AGE_MAX_VALUE, PATTERN
 
 
 def username_validator(username):
     if username == settings.PROFILE_URL_SEGMENT:
         raise ValidationError(
             f'Логин "{settings.PROFILE_URL_SEGMENT}" запрещен.')
-    invalid_chars = re.findall(r'[^\w.@+-]', username)
+    invalid_chars = re.findall(PATTERN, username)
     if invalid_chars:
         raise ValidationError(
             'Недопустимые символы в логине: {} '
@@ -20,14 +20,17 @@ def username_validator(username):
     return username
 
 
-def date_of_birth_validator(date_of_birth):
+def birth_date_validator(birth_date):
     today = date.today()
-    age = today.year - date_of_birth.year
-    if (today.month, today.day) < (date_of_birth.month, date_of_birth.day):
-        age -= 1
-
-    if age < 0 or age > AGE_MAX_VALUE:
+    if birth_date > today:
         raise ValidationError(
-            'Дата рождения должна соответствовать возрасту '
-            f'от 0 до {AGE_MAX_VALUE} лет.'
+            f'Дата рождения {birth_date} больше текущей даты.'
         )
+    age = today.year - birth_date.year - (
+        (today.month, today.day) < (birth_date.month, birth_date.day)
+    )
+    if age > AGE_MAX_VALUE:
+        raise ValidationError(
+            f'Возраст не может превышать {AGE_MAX_VALUE} лет.'
+        )
+    return birth_date

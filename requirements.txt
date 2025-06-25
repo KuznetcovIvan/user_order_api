@@ -7,7 +7,6 @@ defusedxml==0.7.1
 Django==4.2.23
 djangorestframework==3.16.0
 djangorestframework_simplejwt==5.5.0
-djoser==2.3.1
 dotenv==0.9.9
 flake8==7.3.0
 idna==3.10
@@ -21,12 +20,9 @@ pycparser==2.22
 pyflakes==3.4.0
 PyJWT==2.9.0
 python-dotenv==1.1.1
-python3-openid==3.2.0
 pytz==2025.2
 requests==2.32.4
 requests-oauthlib==2.0.0
-social-auth-app-django==5.4.3
-social-auth-core==4.6.1
 sqlparse==0.5.3
 typing_extensions==4.14.0
 tzdata==2025.2
