@@ -6,6 +6,10 @@ from orders.models import Order, User
 
 
 class BaseUserSerializer(serializers.ModelSerializer):
+    """
+    Базовый сериализатор для пользователя.
+    Автоматически исключает поля со значением None из ответа.
+    """
     class Meta:
         model = User
         fields = ('username', 'email', 'birth_date')
@@ -16,20 +20,38 @@ class BaseUserSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(BaseUserSerializer):
-    age = serializers.IntegerField(read_only=True)
+    """
+    Сериализатор пользователя для административных функций.
+    Включает автоматически вычисляемое поле возраста.
+    """
+    age = serializers.IntegerField(
+        read_only=True,
+        help_text='Автоматически вычисляется на основе даты рождения'
+    )
 
     class Meta(BaseUserSerializer.Meta):
         fields = ('id', *BaseUserSerializer.Meta.fields, 'age')
 
 
 class CurrentUserSerializer(BaseUserSerializer):
+    """
+    Сериализатор для работы с профилем текущего пользователя.
+    Позволяет получать и обновлять данные профиля.
+    """
     class Meta(BaseUserSerializer.Meta):
         fields = BaseUserSerializer.Meta.fields
 
 
 class SignUpSerializer(BaseUserSerializer):
+    """
+    Сериализатор для регистрации нового пользователя.
+    Включает валидацию пароля и создание нового пользователя.
+    """
     password = serializers.CharField(
-        write_only=True, min_length=settings.PASSWORD_MIN_LENGTH)
+        write_only=True,
+        min_length=settings.PASSWORD_MIN_LENGTH,
+        help_text=f'Минимальная длина: {settings.PASSWORD_MIN_LENGTH} символов'
+    )
 
     class Meta:
         model = User
@@ -44,6 +66,10 @@ class SignUpSerializer(BaseUserSerializer):
 
 
 class AccessOnlyTokenSerializer(TokenObtainPairSerializer):
+    """
+    Сериализатор для получения access токена.
+    Исключает refresh токен из ответа.
+    """
     def validate(self, attrs):
         data = super().validate(attrs)
         data.pop('refresh', None)
@@ -51,12 +77,20 @@ class AccessOnlyTokenSerializer(TokenObtainPairSerializer):
 
 
 class OrderShortSerializer(serializers.ModelSerializer):
+    """
+    Краткий сериализатор заказа.
+    Используется для обычных пользователей, содержит основную информацию.
+    """
     class Meta:
         model = Order
         fields = ('id', 'title', 'description', 'created_at')
 
 
 class OrderSerializer(OrderShortSerializer):
+    """
+    Полный сериализатор заказа.
+    Используется для администраторов, включает дополнительную информацию.
+    """
     user = serializers.SlugRelatedField(read_only=True, slug_field='username')
 
     class Meta(OrderShortSerializer.Meta):
