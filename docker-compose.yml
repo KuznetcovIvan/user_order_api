@@ -1,0 +1,28 @@
+version: '3'
+
+volumes:
+  pg_data:
+  static:
+
+services:
+  db:
+    image: postgres:13
+    env_file: .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+  backend:
+    build: ./user_order_api/
+    env_file: .env
+    volumes:
+      - static:/backend_static
+    depends_on:
+      - db
+  gateway:
+    build: ./nginx/
+    env_file: .env
+    ports:
+      - 9000:80
+    volumes:
+      - static:/static/
+    depends_on:
+      - backend
