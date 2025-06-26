@@ -26,10 +26,9 @@ def birth_date_validator(birth_date):
         raise ValidationError(
             f'Дата рождения {birth_date} больше текущей даты.'
         )
-    age = today.year - birth_date.year - (
+    if today.year - birth_date.year - (
         (today.month, today.day) < (birth_date.month, birth_date.day)
-    )
-    if age > AGE_MAX_VALUE:
+    ) > AGE_MAX_VALUE:
         raise ValidationError(
             f'Возраст не может превышать {AGE_MAX_VALUE} лет.'
         )

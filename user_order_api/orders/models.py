@@ -53,7 +53,7 @@ class User(AbstractUser):
         )
 
     class Meta:
-        verbose_name = 'Пользователь'
+        verbose_name = 'пользователь'
         verbose_name_plural = 'Пользователи'
         ordering = ('-date_joined',)
 
@@ -61,7 +61,7 @@ class User(AbstractUser):
 class Order(models.Model):
     title = models.CharField('Наименование', max_length=TITLE_MAX_LENGTH)
     description = models.TextField(
-        'Описание', max_length=DESCRIPTION_MAX_LENGTH, blank=True
+        'Описание', max_length=DESCRIPTION_MAX_LENGTH,
     )
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, verbose_name='Пользователь'
