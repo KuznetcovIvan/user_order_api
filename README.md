@@ -109,13 +109,53 @@
   - API будет доступен по адресу [`http://127.0.0.1:9000/api/`](http://127.0.0.1:9000/api/).
   - Административная панель по адресу [`http://127.0.0.1:9000/admin/`](http://127.0.0.1:9000/admin/).
   - Управление контенерами:
-    - Запустить контенеры `docker compose up`
+    - Запустить контенеры `docker compose up` (для запуска в фоне добавьте флаг`-d`)
     - Остановить контейнеры `docker compose down`
-    - Перезапустить контенеры `docker compose restart`
+    - Перезапустить контенеры `docker compose restart` 
     - Пересобрать контейнеры `docker compose build`
     - Просмотр логов `docker compose logs -f`
 
 ---
+
+## Загрузка тестовых данных
+Для быстрого наполнения проекта начальными данными, для тестирования и демонстрации функциональности, можно загрузить заранее подготовленные фикстуры.
+
+**Важно:** 
+- В фикстурах пользоватеоя первичные ключи `(pk)` начинаются с `2`, чтобы избежать перезаписи суперпользователя, создаваемого вручную.
+- У всех создаваемых пользователей задан пароль `TestPass`.
+- <details>
+  <summary>Список всех <code>username</code> из фикстуры (кликните, чтобы развернуть)</summary>
+  <ul>
+    <li>ivan_ivanov</li>
+    <li>anna_smirnova</li>
+    <li>dmitry_petrov</li>
+    <li>ekaterina_kuznetsova</li>
+    <li>alexey_morozov</li>
+    <li>marina_volkova</li>
+    <li>pavel_sokolov</li>
+    <li>olga_novikova</li>
+    <li>sergey_fedorov</li>
+    <li>yulia_mikhailova</li>
+    <li>vladimir_kovalev</li>
+    <li>natalia_popova</li>
+    <li>mikhail_egorov</li>
+    <li>svetlana_ivanova</li>
+    <li>andrey_smirnov</li>
+    <li>elena_koroleva</li>
+    <li>nikita_zaitsev</li>
+    <li>tatiana_romanova</li>
+    <li>roman_antonov</li>
+    <li>kristina_orlova</li>
+  </ul>
+</details>
+
+Находясь в корне проекта, выполните:
+
+- Локальный запуск `python user_order_api/manage.py loaddata fixtures/data.json`
+- В Docker-контейнере `docker compose exec backend python manage.py loaddata fixtures/data.json`
+
+---
+
 ## Возможные проблемы и пути решения
 - Запуск приложения на занятом порту `Address already in use`:
    - В первом варианте запуска (запуск без контейнеров) укажите альтернативный свободный порт `python manage.py runserver 8080`

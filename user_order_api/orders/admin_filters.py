@@ -30,10 +30,7 @@ class AgeGroupFilter(SimpleListFilter):
             'not specified': Q(birth_date__isnull=True),
         }
         condition = age_filters.get(self.value())
-        return (
-            queryset.annotate(age=User.calculate_age_expression())
-            .filter(condition) if condition else queryset
-        )
+        return queryset.filter(condition) if condition else queryset
 
 
 class OrdersCountFilter(SimpleListFilter):
@@ -49,11 +46,9 @@ class OrdersCountFilter(SimpleListFilter):
     def set_ranges(self):
         unique_counts = set(User.objects.annotate(count=Count('orders'))
                                 .values_list('count', flat=True))
-
         if len(unique_counts) < 3:
             self.ranges = None
             return
-
         max_count = max(unique_counts)
         self.few = max_count // 3
         self.medium = (2 * max_count) // 3
@@ -67,7 +62,6 @@ class OrdersCountFilter(SimpleListFilter):
     def filter_by_range(self, key, users=None):
         if key not in self.ranges:
             return User.objects.none()
-
         users = users or User.objects.all()
         low, high = self.ranges[key]
         return users.annotate(count=Count('orders'))\
@@ -104,5 +98,4 @@ class OrdersCountFilter(SimpleListFilter):
         self.set_ranges()
         if not self.value() or not self.ranges:
             return users
-
         return self.filter_by_range(self.value(), users)

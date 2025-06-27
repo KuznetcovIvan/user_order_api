@@ -15,7 +15,6 @@ site.index_title = (
     f'Добро пожаловать в панель управления {settings.PROJECT_NAME}'
 )
 site.empty_value_display = 'Не задано'
-
 site.unregister(Group)
 
 
@@ -26,6 +25,8 @@ class ExtendedUserAdmin(UserAdmin):
         'orders_count'
     )
     list_display_links = list_display
+    search_fields = ('id', 'email', 'username')
+    list_filter = (AgeGroupFilter, OrdersCountFilter, 'date_joined')
     fieldsets = (
         ('Основная информация', {
             'fields': ('username', 'password')
@@ -61,9 +62,6 @@ class ExtendedUserAdmin(UserAdmin):
     @display(description='Число заказов')
     def orders_count(self, obj):
         return obj.orders.count()
-
-    search_fields = ('email', 'username')
-    list_filter = (AgeGroupFilter, OrdersCountFilter, 'date_joined')
 
 
 @register(Order)
