@@ -1,6 +1,7 @@
 import django_filters
-from orders.models import Order
 from django.contrib.auth import get_user_model
+
+from orders.models import Order
 
 User = get_user_model()
 

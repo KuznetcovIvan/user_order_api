@@ -1,5 +1,5 @@
 # UserOrder API
-![Python](https://img.shields.io/badge/Python-3.9+-blue?logo=python&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python&logoColor=white)
 ![Django](https://img.shields.io/badge/Django-4.2-green?logo=django&logoColor=white)
 ![DRF](https://img.shields.io/badge/DRF-3.16-red?logo=django&logoColor=white)
 ![JWT](https://img.shields.io/badge/JWT-SimpleJWT-orange?logo=jsonwebtokens&logoColor=white)
@@ -8,30 +8,37 @@
 ![Docker](https://img.shields.io/badge/Docker-Engine-2496ED?logo=docker&logoColor=white)
 ![Docker Compose](https://img.shields.io/badge/Docker--Compose-1.29.2-003F8C?logo=docker&logoColor=white)
 ![Nginx](https://img.shields.io/badge/Nginx-ReverseProxy-009639?logo=nginx&logoColor=white)
+![DRF Spectacular](https://img.shields.io/badge/DRF_Spectacular-0.27.1-blue?logo=openapi-initiative&logoColor=white)
 
-Это веб-сервис для управления пользователями и их заказами. Проект предоставляет полнофункциональный API с аутентификацией, авторизацией и административным интерфейсом.
+Это веб-сервис для управления пользователями и их заказами, построенный на Django и Django REST Framework. Проект предоставляет REST API с поддержкой JWT-аутентификации, расширенной фильтрацией, пагинацией и интуитивно понятной административной панелью. Поддерживаются базы данных PostgreSQL и SQLite, а развертывание упрощено благодаря Docker и Docker Compose.
 
 
 ### Основные возможности:
 - Регистрация, аутентификация и авторизация пользователей
 - JWT токены для безопасного доступа
 - CRUD операции для пользователей и заказов
+- API документация (Swagger UI и ReDoc)
 - Административная панель с фильтрами, включая динамический, рассчитывающий диапазоны на основе данных
 - Валидация данных
 - Автоматическое вычисление возраста на основе даты рождения
 - Пагинация результатов
 - Расширенная фильтрация и поиск с разграничением прав для админов и обычных пользователей
+   - Для пользователей: фильтрация по возрасту, диапазону возраста, дате рождения; поиск по username и email.
+   - Для заказов: фильтрация по username, email, дате создания и обновления; поиск по названию и описанию.
+   - Разграничение прав: администраторы видят все данные, обычные пользователи — только свои заказы.
 - Поддержка PostgreSQL и SQLite
 
 ---
 
 ## Технический стек
 
+- Python 3.10+
 - Django 4.2.23
 - Django REST Framework 3.16.0
 - JWT (djangorestframework-simplejwt 5.5.0)
 - PostgreSQL / SQLite
 - Docker & Docker Compose
+- DRF Spectacular
 
 ---
 
@@ -102,8 +109,10 @@
   - API будет доступен по адресу [`http://127.0.0.1:9000/api/`](http://127.0.0.1:9000/api/).
   - Административная панель по адресу [`http://127.0.0.1:9000/admin/`](http://127.0.0.1:9000/admin/).
   - Управление контенерами:
+    - Запустить контенеры `docker compose up`
     - Остановить контейнеры `docker compose down`
     - Перезапустить контенеры `docker compose restart`
+    - Пересобрать контейнеры `docker compose build`
     - Просмотр логов `docker compose logs -f`
 
 ---
@@ -126,7 +135,35 @@
 ---
 
 ## API Документация
+Проект предоставляет автоматически генерируемую документацию API через:
 
+- **Swagger UI**: [`http://127.0.0.1:9000/api/docs/`](http://127.0.0.1:9000/api/docs/)
+- **ReDoc**: [`http://127.0.0.1:9000/api/redoc/`](http://127.0.0.1:9000/api/redoc/)
+- **JSON Schema**: [`http://127.0.0.1:9000/api/schema/`](http://127.0.0.1:9000/api/schema/)
+
+### Основные эндпоинты API:
+
+#### Аутентификация
+- `POST /api/auth/signup/` - Регистрация нового пользователя
+- `POST /api/auth/token/` - Получение JWT токена
+
+#### Пользователи (для админов)
+- `GET /api/users/` - Список пользователей
+- `GET /api/users/{username}/` - Получение пользователя по username
+- `PATCH /api/users/{username}/` - Частичное обновление пользователя
+- `DELETE /api/users/{username}/` - Удаление пользователя
+
+#### Профиль
+- `GET /api/me/` - Получение данных текущего пользователя
+- `PATCH /api/me/` - Обновление данных текущего пользователя
+- `DELETE /api/me/` - Удаление текущего аккаунта
+
+#### Заказы
+- `GET /api/orders/` - Список заказов (только свои, для админов - все)
+- `POST /api/orders/` - Создание нового заказа
+- `GET /api/orders/{id}/` - Детали заказа
+- `PATCH /api/orders/{id}/` - Обновление заказа
+- `DELETE /api/orders/{id}/` - Удаление заказа
 ---
 
 ## Административная панель

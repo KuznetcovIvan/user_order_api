@@ -26,9 +26,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'rest_framework',
     'rest_framework_simplejwt',
     'django_filters',
+    'drf_spectacular',
+
     'api.apps.ApiConfig',
     'orders.apps.OrdersConfig'
 ]
@@ -126,6 +129,7 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.SearchFilter',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 SIMPLE_JWT = {
@@ -136,3 +140,11 @@ SIMPLE_JWT = {
 AUTH_USER_MODEL = 'orders.User'
 
 PROFILE_URL_SEGMENT = 'me'
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': f'{PROJECT_NAME} API',
+    'DESCRIPTION': 'API для управления пользователями и заказами',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'DISABLE_ERRORS_AND_WARNINGS': False,
+}

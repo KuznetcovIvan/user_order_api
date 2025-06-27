@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.db import IntegrityError
 from django.db.models import Case, IntegerField, When
 from django_filters.rest_framework import DjangoFilterBackend
-from orders.models import Order
+from drf_spectacular.utils import extend_schema_view
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import ValidationError
@@ -12,8 +12,16 @@ from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from orders.models import Order
+
 from .filters import OrderFilter, UserFilter
 from .permissions import IsOrdererOrAdmin
+from .schemas import (order_create_schema, order_delete_schema,
+                      order_detail_schema, order_list_schema,
+                      order_patch_schema, signup_schema, token_post_schema,
+                      user_delete_schema, user_destroy_schema, user_get_schema,
+                      user_list_schema, user_partial_update_schema,
+                      user_patch_schema, user_retrieve_schema)
 from .serializers import (AccessOnlyTokenSerializer, CurrentUserSerializer,
                           OrderSerializer, OrderShortSerializer,
                           SignUpSerializer, UserSerializer)
@@ -21,13 +29,14 @@ from .serializers import (AccessOnlyTokenSerializer, CurrentUserSerializer,
 User = get_user_model()
 
 
+@signup_schema
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def signup(request):
     """
     Регистрация нового пользователя.
     Создает нового пользователя в системе.
-    Возвращает данные созданного пользователя (без пароля).
+    Возвращает данные созданного пользователя.
     """
     serializer = SignUpSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -51,7 +60,16 @@ class AccessOnlyTokenView(TokenObtainPairView):
     """
     serializer_class = AccessOnlyTokenSerializer
 
+    @token_post_schema
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
 
+
+@extend_schema_view(
+    list=user_list_schema, retrieve=user_retrieve_schema,
+    partial_update=user_partial_update_schema,
+    destroy=user_destroy_schema,
+)
 class UserViewSet(viewsets.ModelViewSet):
     """
     ViewSet для управления пользователями.
@@ -60,7 +78,7 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     serializer_class = UserSerializer
     lookup_field = 'username'
-    http_method_names = ('get', 'post', 'patch', 'delete')
+    http_method_names = ('get', 'patch', 'delete')
     permission_classes = (IsAdminUser,)
     filter_backends = (DjangoFilterBackend, SearchFilter)
     filterset_class = UserFilter
@@ -78,6 +96,9 @@ class UserViewSet(viewsets.ModelViewSet):
         )
         return queryset
 
+    @user_get_schema
+    @user_patch_schema
+    @user_delete_schema
     @action(
         detail=False,
         methods=('get', 'patch', 'delete'),
@@ -109,12 +130,21 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@extend_schema_view(
+    list=order_list_schema,
+    create=order_create_schema,
+    retrieve=order_detail_schema,
+    partial_update=order_patch_schema,
+    destroy=order_delete_schema,
+)
 class OrderViewSet(viewsets.ModelViewSet):
     """
     ViewSet для управления заказами.
     Аутентифицированные пользователи видят только свои заказы.
     Администраторы видят все заказы и дополнительную информацию.
     """
+    queryset = Order.objects.none()
+    http_method_names = ('get', 'post', 'patch', 'delete')
     permission_classes = (IsOrdererOrAdmin,)
     filter_backends = (DjangoFilterBackend, SearchFilter)
     filterset_class = OrderFilter
