@@ -5,10 +5,13 @@ charset-normalizer==3.4.2
 cryptography==45.0.4
 defusedxml==0.7.1
 Django==4.2.23
+django-filter==25.1
 djangorestframework==3.16.0
 djangorestframework_simplejwt==5.5.0
 dotenv==0.9.9
+flake8==7.3.0
 idna==3.10
+isort==6.0.1
 mccabe==0.7.0
 oauthlib==3.3.1
 psycopg==3.2.9

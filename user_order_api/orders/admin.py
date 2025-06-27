@@ -1,10 +1,13 @@
 from django.conf import settings
 from django.contrib.admin import ModelAdmin, display, register, site
+from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
 
 from .admin_filters import AgeGroupFilter, OrdersCountFilter
-from .models import Order, User
+from .models import Order
+
+User = get_user_model()
 
 site.site_header = f'Администрирование {settings.PROJECT_NAME}'
 site.site_title = f'{settings.PROJECT_NAME} Администрирование'

@@ -1,21 +1,24 @@
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db import IntegrityError
 from django.db.models import Case, IntegerField, When
-from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from orders.models import Order
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import ValidationError
+from rest_framework.filters import SearchFilter
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from orders.constants import USERNAME_PATH_PARAM_REGEX
-from orders.models import Order, User
-
+from .filters import OrderFilter, UserFilter
 from .permissions import IsOrdererOrAdmin
 from .serializers import (AccessOnlyTokenSerializer, CurrentUserSerializer,
                           OrderSerializer, OrderShortSerializer,
                           SignUpSerializer, UserSerializer)
+
+User = get_user_model()
 
 
 @api_view(['POST'])
@@ -59,6 +62,9 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
     http_method_names = ('get', 'post', 'patch', 'delete')
     permission_classes = (IsAdminUser,)
+    filter_backends = (DjangoFilterBackend, SearchFilter)
+    filterset_class = UserFilter
+    search_fields = ('username', 'email')
 
     def get_queryset(self):
         """Возвращает пользователей с вычисленным возрастом."""
@@ -110,6 +116,26 @@ class OrderViewSet(viewsets.ModelViewSet):
     Администраторы видят все заказы и дополнительную информацию.
     """
     permission_classes = (IsOrdererOrAdmin,)
+    filter_backends = (DjangoFilterBackend, SearchFilter)
+    filterset_class = OrderFilter
+    search_fields = ('title', 'description')
+
+    def get_queryset(self):
+        """Возвращает заказы в зависимости от прав пользователя."""
+        orders = Order.objects.select_related('user')
+        return (orders if self.request.user.is_staff
+                else orders.filter(user=self.request.user))
+
+    def filter_queryset(self, queryset):
+        """
+        Применяет фильтрацию и поиск к queryset.
+        Для администраторов доступны все фильтры и поиск.
+        Для обычных пользователей доступен только поиск.
+        """
+        if self.request.user.is_staff:
+            return super().filter_queryset(queryset)
+        else:
+            return SearchFilter().filter_queryset(self.request, queryset, self)
 
     def get_serializer_class(self):
         """Возвращает подходящий сериализатор в зависимости от пользователя."""
@@ -117,31 +143,6 @@ class OrderViewSet(viewsets.ModelViewSet):
             return OrderSerializer
         return OrderShortSerializer
 
-    def get_queryset(self):
-        """Возвращает заказы в зависимости от прав пользователя."""
-        if self.request.user.is_staff:
-            return Order.objects.select_related('user')
-        return Order.objects.filter(user=self.request.user)
-
     def perform_create(self, serializer):
         """Автоматически привязывает заказ к текущему пользователю."""
         serializer.save(user=self.request.user)
-
-    @action(
-        detail=False,
-        url_path=USERNAME_PATH_PARAM_REGEX,
-        methods=('get',),
-        permission_classes=(IsAdminUser,)
-    )
-    def orders_by_username(self, request, username):
-        """
-        Получение заказов конкретного пользователя.
-        Доступно только администраторам.
-        Возвращает все заказы указанного пользователя.
-        """
-        serializer = self.get_serializer(
-            self.get_queryset()
-            .filter(user=get_object_or_404(User, username=username)),
-            many=True
-        )
-        return Response(serializer.data)

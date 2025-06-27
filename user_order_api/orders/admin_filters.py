@@ -1,7 +1,8 @@
 from django.contrib.admin import SimpleListFilter
+from django.contrib.auth import get_user_model
 from django.db.models import Count, Q
 
-from .models import User
+User = get_user_model()
 
 
 class AgeGroupFilter(SimpleListFilter):

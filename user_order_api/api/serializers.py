@@ -1,8 +1,10 @@
 from django.conf import settings
+from django.contrib.auth import get_user_model
+from orders.models import Order
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from orders.models import Order, User
+User = get_user_model()
 
 
 class BaseUserSerializer(serializers.ModelSerializer):
